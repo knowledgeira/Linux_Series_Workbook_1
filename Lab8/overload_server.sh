@@ -1,30 +1,40 @@
+ #!/bin/bash
+
+# Create the cpu_task.sh script
+cat <<EOL > cpu_task.sh
 #!/bin/bash
+while true; do
+    echo "scale=5000; a(1)*4" | bc -l >/dev/null
+done
+EOL
 
-# Function to consume CPU resources
-consume_cpu() {
-    echo "Starting CPU-intensive task..."
-    for i in {1..1000000}; do
-        echo "scale=5000; a(1)*4" | bc -l >/dev/null
-    done &
-}
-
-# Function to consume memory resources
-consume_memory() {
-    echo "Starting memory-intensive task..."
+# Create the memory_task.sh script
+cat <<EOL > memory_task.sh
+#!/bin/bash
+while true; do
     declare -a arr
-    while true; do
-        arr+=($(seq 1 100000))
-    done &
-}
+    arr+=($(seq 1 100000))
+done
+EOL
+
+# Create the overload_server.sh script
+cat <<EOL > overload_server.sh
+#!/bin/bash
 
 # Main script execution
 echo "Simulating an overloaded server..."
 
 # Run CPU-intensive task
-consume_cpu
+./cpu_task.sh &
 
 # Run memory-intensive task
-consume_memory
+./memory_task.sh &
 
 # Keep the script running
 wait
+EOL
+
+# Set execute permissions for the scripts
+chmod +x cpu_task.sh memory_task.sh overload_server.sh
+
+echo "Scripts created and permissions set!"
