@@ -135,9 +135,6 @@ MiB Swap:   2048.0 total,      0.0 free,   2048.0 used.     11.9 avail Mem
  
  
  
-Certainly! Let's create a single task based on the provided scenario.
-Lab: Investigating Missing Processes and OOM Killer
- 
 Objective: Understand and investigate the sudden disappearance of a process and the potential involvement of the OOM killer.
  
  
