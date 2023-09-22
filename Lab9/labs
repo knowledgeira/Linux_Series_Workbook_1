@@ -1,0 +1,523 @@
+Command	Description	Example	Explanation
+ps	Display current processes.	ps aux	Shows detailed information about all processes.
+top	Display dynamic real-time view of running processes.	top	Provides a live scrolling view of system processes.
+htop	Interactive process viewer (needs installation).	htop	An enhanced version of top with a user-friendly interface.
+kill [PID]	Kill a process by its PID.	kill 1234	Terminates the process with PID 1234.
+killall [process_name]	Kill all processes by name.	killall nginx	Terminates all nginx processes.
+pkill [process_name]	Kill processes by name.	pkill nginx	Similar to killall, but offers more flexibility.
+kill -l	List all signal names.	kill -l	Displays a list of all signal names that can be used to terminate processes.
+kill -SIGSTOP [PID]	Stop a process.	kill -SIGSTOP 1234	Stops the process with PID 1234 without terminating it.
+kill -SIGCONT [PID]	Continue a stopped process.	kill -SIGCONT 1234	Resumes the process with PID 1234 that was previously stopped.
+bg	Put a process in the background.	bg	Sends the current job to the background.
+fg	Bring a process to the foreground.	fg	Brings the most recent background job to the foreground.
+jobs	List background jobs.	jobs	Displays a list of jobs running in the background.
+uptime	Show system uptime and load.	uptime	Displays how long the system has been running and the system load.
+who	Display who is logged in.	who	Shows all logged-in users.
+w	Show who is logged in and what they are doing.	w	Displays more detailed information than who.
+last	Display the last users logged in.	last	Shows a list of the last logged-in users.
+nice	Run a command with modified scheduling priority.	nice -n 10 command	Runs command with a lower priority.
+renice	Modify priority of running processes.	renice +10 -p 1234	Increases the priority of process with PID 1234.
+vmstat	Report virtual memory statistics.	vmstat	Displays information about system processes, memory, paging, etc.
+iostat	Report CPU and I/O statistics.	iostat	Shows CPU statistics and I/O statistics for devices.
+free	Display memory usage.	free -h	Shows memory usage in a human-readable format.
+lsof	List open files.	lsof -u john	Lists all files opened by the user john.
+strace	Trace system calls and signals.	strace -p 1234	Traces system calls for the process with PID 1234.
+ss	Utility to investigate sockets.	ss -tuln	Displays all open sockets.
+netstat	Network statistics.	netstat -tuln	Displays network connections, routing tables, etc.
+pidof [process_name]	Get the PID of a process by name.	pidof nginx	Returns the PID of the nginx process.
+pgrep [process_name]	Get the PID of a process by name.	pgrep nginx	Similar to pidof, but offers more flexibility.
+pstree	Display a tree of processes.	pstree	Shows processes in a tree structure.
+watch [command]	Execute a program periodically.	watch df -h	Runs df -h every 2 seconds and displays the output.
+timeout [duration] [command]	Run a command with a time limit.	timeout 10s command	Runs command but stops it after 10 seconds.
+tload	Graphical representation of system load average.	tload	Displays a graphical representation of the system load average.
+mpstat	Report processors related statistics.	mpstat	Displays statistics about individual CPU cores.
+sar	Collect and report system activity.	sar	Provides a comprehensive view of system performance.
+top -o %CPU	Display processes sorted by CPU usage.	top -o %CPU	Shows processes with the highest CPU usage at the top.
+top -o %MEM	Display processes sorted by memory usage.	top -o %MEM	Shows processes with the highest memory usage at the top.
+top -u [user]	Display processes for a specific user.	top -u john	Shows processes running under the user john.
+top -p [PID]	Monitor specific process by PID.	top -p 1234	Monitors the process with PID 1234.
+This table provides a comprehensive overview of commands related to process management and monitoring in Linux.
+
+
+
+1. Download script for performing this LABs
+ 
+vagrant@knowledgeira:~$ curl -s -o setup_overload_simulation.sh https://raw.githubusercontent.com/knowledgeira/Linux_Series_Workbook_1/mj/Lab9/setup_overload_simulation.sh && sudo chmod +x setup_overload_simulation.sh && ./setup_overload_simulation.sh && ./overload_server.sh
+ 
+Script Summary:
+ 
+TYou are downloading setup_overload_simulation.sh, automates the creation of three separate scripts designed to simulate an overloaded server in terms of CPU and memory usage. Here's a breakdown:
+ 
+    cpu_task.sh:
+        A script that continuously performs mathematical calculations using the bc command, simulating a CPU-intensive task.
+ 
+    memory_task.sh:
+        A script that continuously allocates memory by appending a sequence of numbers to an array, simulating a memory-intensive task.
+ 
+    overload_server.sh:
+        The main script that runs both the cpu_task.sh and memory_task.sh scripts in the background.
+        It displays a message indicating that it's simulating an overloaded server.
+        It then runs the CPU-intensive task and the memory-intensive task in the background.
+        It waits for both background tasks to complete (which they won't, due to their infinite loops).
+ 
+    Setting Execute Permissions:
+        After creating the three scripts, the main script sets execute permissions for them, ensuring they can be run as executable programs.
+ 
+    Completion Message:
+        The script displays a message indicating that the scripts have been created and their permissions have been set.
+ 
+In essence, the script provides a convenient way to set up a simulated environment where a server can be stressed in terms of both CPU and memory usage.
+ 
+ 
+2.SSH from second terminal...just vagrant ssh {you machine in new tab}
+ 
+ 
+ 
+ 
+Task 1: Identifying Processes Related to a Script
+ 
+Question: How can you identify processes related to the overload_server.sh script?
+ 
+Solution:
+ 
+    Use the ps command: ps aux | grep overload
+ 
+Explanation:
+The ps command provides detailed information about processes. By using grep, you can filter the output to only show processes related to the overload_server.sh script.
+ 
+Verification:
+ 
+vagrant@knowledgeira:~$ ps aux | grep overload
+vagrant     1706  0.0  0.0   7368  1768 pts/0    S+   21:56   0:00 /bin/bash ./overload_server.sh
+ 
+Task 2: Visualizing Process Hierarchy
+ 
+Question: How can you visualize the hierarchy of processes spawned by the overload_server.sh script?
+ 
+Solution:
+ 
+    Use the pstree command with the PID of the overload_server.sh script: pstree -p [PID]
+ 
+Explanation:
+The pstree command displays a tree of processes, showing the relationship between the main script and its child processes.
+ 
+Verification:
+ 
+vagrant@knowledgeira:~$ pstree -p 1706
+overload_server(1706)─┬─cpu_task.sh(1707)───bc(1756)
+                      └─memory_task.sh(1708)
+ 
+ 
+Task 3: Monitoring System Load and Resource Consumption
+ 
+Question: How can you monitor the system's load and resource consumption in real-time?
+ 
+Solution:
+ 
+    top
+ 
+Explanation:
+The top command provides a dynamic real-time view of the system. It displays system summary information and a list of processes currently being managed by the Linux kernel. It shows details like CPU usage, memory consumption, and which processes are consuming the most resources.
+ 
+Verification:
+ 
+vagrant@knowledgeira:~$ top
+top - 21:57:21 up 1 min,  2 users,  load average: 1.83, 0.55, 0.19
+Tasks: 162 total,   4 running, 158 sleeping,   0 stopped,   0 zombie
+%Cpu(s): 21.4 us, 64.3 sy,  0.0 ni,  0.0 id, 10.7 wa,  0.0 hi,  3.6 si,  0.0 st
+MiB Mem :   3924.0 total,     82.2 free,   3807.6 used,     34.2 buff/cache
+MiB Swap:   2048.0 total,      0.0 free,   2048.0 used.     11.9 avail Mem
+ 
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   1756 vagrant   20   0    3504   2300   1908 R  75.0   0.1   0:12.06 bc
+     92 root      20   0       0      0      0 R  62.5   0.0   0:03.52 kswapd0
+   1708 vagrant   20   0       0      0      0 R  62.5   0.0   0:53.46 memory_task.sh
+ 
+ 
+ 
+Certainly! Let's create a single task based on the provided scenario.
+Lab: Investigating Missing Processes and OOM Killer
+ 
+Objective: Understand and investigate the sudden disappearance of a process and the potential involvement of the OOM killer.
+ 
+ 
+Task 4: Investigating the Disappearance of the memory_task.sh Process
+ 
+Question: You started the overload_server.sh script, which runs both cpu_task.sh and memory_task.sh. After a few minutes, you notice that only the cpu_task.sh process is running. What happened to the memory_task.sh process?
+ 
+Solution:
+ 
+    First, verify that the memory_task.sh process is no longer running: ps aux | grep memory_task.sh
+    Check system logs for OOM killer activity: sudo dmesg | grep -i oom
+ 
+Explanation:
+ 
+When a system runs critically low on memory, the Linux kernel might activate the OOM killer to free up memory. The OOM killer selects a process to terminate based on specific criteria. If the memory_task.sh process was consuming a significant amount of memory, it might have been terminated by the OOM killer.
+ 
+Verification:
+ 
+   vagrant@knowledgeira:~$ pstree -p 1706
+overload_server(1706)───cpu_task.sh(1707)───bc(1825)
+ 
+ 
+vagrant@knowledgeira:~$ sudo dmesg | grep -i oom
+[   94.293649] top invoked oom-killer: gfp_mask=0x1100cca(GFP_HIGHUSER_MOVABLE), order=0, oom_score_adj=0
+[   94.293671]  oom_kill_process.cold+0xb/0x10
+[   94.293813] [  pid  ]   uid  tgid total_vm      rss pgtables_bytes swapents oom_score_adj name
+[   94.293892] oom-kill:constraint=CONSTRAINT_NONE,nodemask=(null),cpuset=user.slice,mems_allowed=0,global_oom,task_memcg=/user.slice/user-1000.slice/session-3.scope,task=memory_task.sh,pid=1708,uid=1000
+[   94.293901] Out of memory: Killed process 1708 (memory_task.sh) total-vm:5813896kB, anon-rss:3736308kB, file-rss:1820kB, shmem-rss:0kB, UID:1000 pgtables:11420kB
+oom_score_adj:0
+vagrant@knowledgeira:~$ date
+Mon Sep 18 10:05:22 PM UTC 2023
+ 
+ 
+Task 5: Adjusting Process Priority
+ 
+Question: You notice that the cpu_task.sh process is consuming a lot of CPU resources. How can you adjust its priority to be lower?
+ 
+Solution:
+ 
+    Identify the PID of the cpu_task.sh process: pgrep -f cpu_task.sh
+    Use the command: renice +10 [PID]
+ 
+Explanation:
+The renice command is used to change the priority of a running process. A positive value increases the nice value, which means the process will have a lower priority.
+ 
+Verification:
+vagrant@knowledgeira:~$ pgrep -f cpu_task.sh
+1707
+vagrant@knowledgeira:~$ renice +10 1707
+1707 (process ID) old priority 0, new priority 10
+ 
+Task 6: Understanding renice Values
+ 
+Question: What is the range of nice values that can be set using renice and what do they signify?
+ 
+Solution:
+Research and understand the range and significance of nice values.
+ 
+Explanation:
+Nice values can range from -20 to 19. A lower nice value means higher priority, and a higher nice value means lower priority. A process with a nice value of -20 is very high priority, while a process with a nice value of 19 is very low priority.
+ 
+Verification:
+You can check the nice value of a process using the top command or by checking the file /proc/[PID]/stat.
+ 
+vagrant@knowledgeira:~$ cat /proc/1707/stat
+ 
+1707 (cpu_task.sh) S 1706 1706 1686 34816 1706 4194304 3202 22683 19 2274 0 1 101782 304 30 10 1 0 3067 7680000 671 18446744073709551615 94173223202816 94173224115981 140727637931056 0 0 0 65536 6 65536 1 0 0 17 0 0 0 0 0 0 94173224360624 94173224408656 94173257134080 140727637931885 140727637931909 140727637931909 140727637934058 0
+ 
+ 
+ 
+Task 7: Determining the Relative Start Time of the Overload Script
+ 
+Question: Given the current system time and the output of the ps -eo command, how can you determine how long ago the overload_server.sh script was started?
+ 
+Solution:
+ 
+    Check the current system time: date
+    Determine the start time of the overload_server.sh process: ps -eo pid,user,comm,start | grep overload
+ 
+Explanation:
+By comparing the current system time from the date command to the start time of the overload_server.sh process from the ps -eo command, you can determine how long ago the script was started.
+ 
+Verification:
+ 
+    Note the current system time from the date command.
+    Observe the start time of the overload_server.sh process from the ps -eo command.
+    Calculate the difference between the two times to determine how long ago the script was started.
+ 
+For example, given the output:
+ 
+vagrant@knowledgeira:~$ date ; ps -eo pid,user,comm,start | grep overload
+Mon Sep 18 10:20:02 PM UTC 2023
+   1706 vagrant  overload_server 21:56:17
+ 
+ 
+The overload_server.sh script was started at 21:56:17, and the current time is 10:20:02 PM. This means the script has been running for approximately 24 minutes
+ 
+ 
+Task 8: Monitoring and Analyzing Load Average
+ 
+Question: Given the current system's load average and the CPU utilization of processes, how can you determine the impact of the overload_server.sh script on the system's load?
+ 
+Solution:
+ 
+    Check the current load average: uptime
+    Monitor the top processes by CPU utilization: top
+    Observe the load average values and the %CPU column for processes related to the overload_server.sh script.
+ 
+Explanation:
+The load average represents the average system load over a period of time. It provides three values, representing the past 1, 5, and 15 minutes, respectively. A load average of 1.0 on a single-core CPU means it's fully utilized, while on a multi-core system, it's essential to consider the number of cores (which can be determined using nproc).
+ 
+The top command provides a real-time view of the system, showing processes sorted by CPU utilization by default. The %CPU column indicates the percentage of CPU used by each process.
+ 
+By comparing the load average to the CPU utilization of the overload_server.sh related processes, you can determine the script's impact on the system's load.
+ 
+Verification:
+ 
+    Note the load average values from the uptime command.
+    Observe the %CPU column for the bc process (or related processes) in the top command.
+    Compare the load average to the CPU utilization of the bc process. If the bc process is using 100% CPU, it's fully utilizing one core, which should be reflected in the load average.
+ 
+For example, given the output:
+ 
+vagrant@knowledgeira:~$ nproc
+2
+vagrant@knowledgeira:~$ uptime
+22:30:00 up 34 min,  2 users,  load average: 0.94, 0.98, 0.94
+ 
+The uptime command provides a concise view of the system's status, including how long it's been running, how many users are currently logged in, and the system's load average. Let's break down the output you provided:
+ 
+ 
+22:30:00 up 34 min,  2 users,  load average: 0.94, 0.98, 0.94
+ 
+    22:30:00: This is the current system time. It indicates that the time when you ran the uptime command was 22:30:00.
+ 
+    up 34 min: This tells us that the system has been running continuously for 34 minutes since its last startup or reboot.
+ 
+    2 users: This indicates that there are two user sessions currently active on the system. These could be terminal sessions, SSH sessions, etc. Wehad taken 2 ssh in starting.
+ 
+    load average: 0.94, 0.98, 0.94: This represents the system's load average over three different time intervals:
+        The first value (0.94) is the average load over the past 1 minute.
+        The second value (0.98) is the average load over the past 5 minutes.
+        The third value (0.94) is the average load over the past 15 minutes.
+ 
+The load average is a measure of the number of tasks waiting in the system's queue combined with the number currently being executed. On a single-core system, a load average of 1.0 would mean the CPU is fully utilized. On a multi-core system, you'd need to consider the number of cores to interpret the load average. For instance, on a system with 2 CPU cores (like yours), a load average of 2.0 would mean both cores are fully utilized.
+ 
+In our case, with a load average of 0.94, it suggests that the system is using most of one CPU core but isn't overloaded. Given the previous context of the overload_server.sh script running, it's likely that this script (specifically the bc process) is contributing significantly to this load.
+ 
+Task 9: Terminating an SSH User Session
+ 
+Question: If you identify a suspicious or unwanted SSH user session, how can you terminate it?
+ 
+Solution:
+ 
+    Use the who command to identify the terminal (TTY/PTS) of the unwanted session.
+    Use the pkill command to terminate the session by targeting the terminal. For example, to kill all processes on terminal pts/1, you would use: pkill -t pts/1.
+ 
+Explanation:
+The pkill command allows you to send signals to processes based on various criteria. By using the -t option followed by a terminal identifier, you can target all processes associated with a specific terminal, effectively terminating the user session on that terminal.
+ 
+Warning: Terminating a user session will kill all processes associated with that session. Ensure you have identified the correct session and are aware of the implications before proceeding.
+ 
+Verification:
+ 
+    After running the pkill command, use the who command again to ensure the unwanted session is no longer listed.
+    Optionally, you can also use the ps command to verify that no processes from that session remain active.
+ 
+ 
+ 
+Task 10 : Think some ssh user actually started script, you as a admin terminate it.
+ 
+use w instead of who
+ 
+Solution :
+w 
+pkill -t pts/0
+ 
+(kill one with bc -l)
+ 
+Verification :
+ 
+vagrant@knowledgeira:~$ w
+22:30:33 up 34 min,  2 users,  load average: 0.96, 0.99, 0.94
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+vagrant  pts/0    10.0.2.2         21:56   34:17   2.26s  2.22s bc -l
+vagrant  pts/1    10.0.2.2         21:56    0.00s  0.05s  0.00s w
+ 
+vagrant@knowledgeira:~$ pkill -t pts/0
+ 
+ 
+you can see from first session process is terminated.
+vagrant@knowledgeira:~$ curl -s -o setup_overload_simulation.sh https://raw.githubusercontent.com/knowledgeira/Linux_Series_Workbook_1/mj/Lab9/setup_overload_simulation.sh && sudo chmod +x setup_overload_simulation.sh && ./setup_overload_simulation.sh && ./overload_server.sh
+Scripts created and permissions set!
+Simulating an overloaded server...
+Terminated
+vagrant@knowledgeira:~$
+ 
+
+
+Task 11: Running the Overload Server Script
+Task:
+1.Run the overload_server.sh script provided using the following command:
+2../overload_server.sh
+
+Solution:
+# Run the overload_server.sh script
+vagrant@knowledgeira:~$ ./overload_server.sh
+Simulating an overloaded server...
+
+Explanation:
+The overload_server.sh script simulates an overloaded server by running CPU-intensive and memory-intensive tasks in the background.
+
+
+Task 12: Pausing and Resuming the Script
+Task:
+3.Pause the execution of the overload_server.sh script by pressing Ctrl + Z.
+4.Resume the script execution in the background using the bg command.
+Solution:
+# Pause the script execution
+^Z
+[1]+  Stopped                 ./overload_server.sh
+
+# Resume the script execution in the background
+vagrant@knowledgeira:~$ bg
+[1]+ ./overload_server.sh &
+
+Explanation:
+Pausing a process allows it to be temporarily stopped, and it can be resumed later.
+
+
+Task 13: Terminating the Script with pkill
+Task:
+5.Use the pkill command to terminate the overload_server.sh script.
+Solution:
+# Terminate the script using pkill
+vagrant@knowledgeira:~$ pkill -f overload_server.sh
+[1]+  Terminated              ./overload_server.sh
+
+Explanation:
+The pkill command is used to terminate processes based on various criteria, including their name.
+
+
+Task 14: Checking Script Status After Termination
+Task:
+6.Check if the overload_server.sh script is still running by using the ps aux | grep overload_server.sh command.
+Solution:
+# Check if the script is still running
+vagrant@knowledgeira:~$ ps aux | grep overload_server.sh
+
+Explanation:
+The ps command with grep is used to search for processes containing the name "overload_server.sh" in their command line.
+
+Task 15: Investigating Process Status After Killing "overload_server.sh"
+Scenario: You have been running an overloaded server simulation using the "overload_server.sh" script. After a while, you decided to stop the simulation by killing the "overload_server.sh" process. However, you noticed that the "bc" process, which was spawned by "overload_server.sh," is still running. In this task, you will investigate why the "bc" process continues to run even after killing "overload_server.sh" and check the process tree (pstree) to understand the process relationships.
+Task:
+7.Run the "overload_server.sh" script to start the overloaded server simulation.
+./overload_server.sh
+
+While the simulation is running, open a new terminal window or tab and check the process status using top. Observe that the "bc" process is running even after you have killed "overload_server.sh."
+top
+
+In the terminal where you ran top, press q to exit top.
+In the same terminal, check the process tree using pstree to see the relationship between processes.
+8.pstree
+
+Questions:
+9.What do you observe in top regarding the status of the "bc" process after killing "overload_server.sh"?
+10.What does pstree show in terms of process relationships after killing "overload_server.sh"?
+11.Explain why the "bc" process is still running and why it's not terminated when "overload_server.sh" is killed.
+Solution:
+12.In top, you will observe that the "bc" process continues to run even after killing "overload_server.sh." It may appear as a running process.
+13.When you run pstree, you will see that the "bc" process is now re-parented to the init process (usually with PID 1). It is no longer a child of "overload_server.sh."
+14.The "bc" process continues to run because it was spawned as a child of "overload_server.sh," but when you killed "overload_server.sh," it became an orphaned process. Orphaned processes are re-parented to the init process, allowing them to continue running. This behavior ensures that important processes are not abruptly terminated when their parent process exits unexpectedly.
+vagrant@knowledgeira:~$ top
+top - 22:59:31 up  1:03,  2 users,  load average: 1.02, 0.72, 0.64
+Tasks: 145 total,   2 running, 143 sleeping,   0 stopped,   0 zombie
+%Cpu(s): 18.4 us,  0.0 sy,  0.0 ni, 81.6 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem :   3924.0 total,   3702.8 free,    163.4 used,     57.9 buff/cache
+MiB Swap:   2048.0 total,   2011.8 free,     36.2 used.   3611.5 avail Mem
+ 
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2443 vagrant   20   0    3504   2252   1980 R 100.0   0.1   0:05.36 bc
+   2396 vagrant   20   0   10480   3552   2780 R   0.3   0.1   0:00.17 top                                                                                                1 root      20   0  167468   9440   5428 S   0.0   0.2   0:00.99 systemd
+      2 root      20   0       0      0      0 S   0.0   0.0   0:00.00 kthreadd
+      3 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_gp
+      4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_par_gp
+      5 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 slub_flushwq
+      6 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 netns
+      8 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker/0:0H-events_highpri
+     10 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 mm_percpu_wq
+     11 root      20   0       0      0      0 S   0.0   0.0   0:00.00 rcu_tasks_rude_
+     12 root      20   0       0      0      0 S   0.0   0.0   0:00.00 rcu_tasks_trace
+     13 root      20   0       0      0      0 S   0.0   0.0   0:00.06 ksoftirqd/0
+     14 root      20   0       0      0      0 I   0.0   0.0   0:00.28 rcu_sched
+     15 root      rt   0       0      0      0 S   0.0   0.0   0:00.01 migration/0
+     16 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 idle_inject/0
+     18 root      20   0       0      0      0 S   0.0   0.0   0:00.00 cpuhp/0
+     19 root      20   0       0      0      0 S   0.0   0.0   0:00.00 cpuhp/1
+     20 root     -51   0       0      0      0 S   0.0   0.0   0:00.00 idle_inject/1
+     21 root      rt   0       0      0      0 S   0.0   0.0   0:00.17 migration/1
+     22 root      20   0       0      0      0 S   0.0   0.0   0:00.04 ksoftirqd/1
+     24 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker/1:0H-events_highpri
+     25 root      20   0       0      0      0 S   0.0   0.0   0:00.00 kdevtmpfs
+     26 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 inet_frag_wq
+     27 root      20   0       0      0      0 S   0.0   0.0   0:00.00 kauditd
+     28 root      20   0       0      0      0 S   0.0   0.0   0:00.00 khungtaskd
+     29 root      20   0       0      0      0 S   0.0   0.0   0:00.00 oom_reaper
+     30 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 writeback
+     31 root      20   0       0      0      0 S   0.0   0.0   0:00.06 kcompactd0
+     32 root      25   5       0      0      0 S   0.0   0.0   0:00.00 ksmd
+     33 root      39  19       0      0      0 S   0.0   0.0   0:00.00 khugepaged
+     80 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kintegrityd
+     81 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kblockd
+     82 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 blkcg_punt_bio
+     83 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 tpm_dev_wq
+     84 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 ata_sff
+vagrant@knowledgeira:~$ pstree
+systemd─┬─ModemManager───2*[{ModemManager}]
+        ├─VBoxDRMClient───3*[{VBoxDRMClient}]
+        ├─VBoxService───8*[{VBoxService}]
+        ├─agetty
+        ├─cpu_task.sh───bc
+        ├─cron
+        ├─dbus-daemon
+        ├─irqbalance───{irqbalance}
+        ├─multipathd───6*[{multipathd}]
+        ├─networkd-dispat
+        ├─polkitd───2*[{polkitd}]
+        ├─rsyslogd───3*[{rsyslogd}]
+        ├─snapd───11*[{snapd}]
+        ├─sshd─┬─sshd───sshd───bash
+        │      └─sshd───sshd───bash───pstree
+        ├─systemd───(sd-pam)
+        ├─systemd-journal
+        ├─systemd-logind
+        ├─systemd-network
+        ├─systemd-resolve
+        ├─systemd-udevd
+        └─udisksd───4*[{udisksd}]
+vagrant@knowledgeira:~$
+
+
+Lab 16: Understanding Background Processes and Termination
+Task: Explain why the kill command with overload_server.sh doesn't kill bc -l.
+Solution:
+When you run the overload_server.sh script, it spawns two background processes: cpu_task.sh and memory_task.sh, both of which run indefinitely. These background processes run independently of the overload_server.sh script, and they are not directly managed by it.
+
+vagrant@knowledgeira:~$ cat overload_server.sh
+#!/bin/bash
+ 
+# Main script execution
+echo "Simulating an overloaded server..."
+ 
+# Run CPU-intensive task
+./cpu_task.sh &
+ 
+# Run memory-intensive task
+./memory_task.sh &
+ 
+# Keep the script running
+wait
+Let's break down why kill overload_server.sh doesn't kill bc -l:
+15.Parent-Child Relationship: overload_server.sh starts cpu_task.sh and memory_task.sh as child processes using the & operator. These child processes become independent of the parent overload_server.sh and continue running even if the parent script is terminated.
+16.Signal Handling: When you use kill overload_server.sh, it sends a termination signal (SIGTERM by default) to the parent process (overload_server.sh). However, this signal is not automatically propagated to its child processes (cpu_task.sh and memory_task.sh).
+17.Process Hierarchy: The bc -l process you see running is not directly related to overload_server.sh. It is running because it was started by cpu_task.sh as a separate child process. This child process will continue running even if overload_server.sh is terminated, as it's a child of cpu_task.sh.
+Explanation:
+The behavior you're observing is due to the independent nature of the processes. When you kill overload_server.sh, it only affects that process, not its child processes. This is a fundamental characteristic of how Unix-like operating systems manage processes.
+
+This orphaned process not is controlled by Systemd.
+Verification:
+
+vagrant@knowledgeira:~$ watch -n1 "ps aux | grep bc"
+Every 1.0s: ps aux | grep bc                                                                                                  knowledgeira: Mon Sep 18 23:34:35 2023
+ 
+vagrant     3273  112  0.0   3504  2136 pts/0    R    23:34   0:06 bc -l
+vagrant     3274  0.0  0.0   6756  3508 pts/1    S+   23:34   0:00 watch -n1 ps aux | grep bc
+vagrant     3291  0.0  0.0   6756  1316 pts/1    S+   23:34   0:00 watch -n1 ps aux | grep bc
+vagrant     3292  0.0  0.0   2888   980 pts/1    S+   23:34   0:00 sh -c ps aux | grep bc
+vagrant     3294  0.0  0.0   2888   100 pts/1    R+   23:34   0:00 sh -c ps aux | grep bc
+
+
+LAb 17 Kill bc 
+Solution kill check
