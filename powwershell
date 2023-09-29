@@ -1,54 +1,42 @@
-MANUAL INSTALLATION STEPS FOR SETTING UP GUEST UBUNTU VM USING VAGRANT AND VIRTUALBOX ON HOST WINDOWS 11
-1.	Open PowerShell as Administrator
+# Step 1: Open PowerShell as Administrator
+Start-Process powershell -ArgumentList 'Start-Process powershell -Verb runAs'
 
-a.	Press Windows + S to open the search bar.
-b.	Type in PowerShell .
-c.	Right-click on Windows PowerShell from the search results and select Run as administrator .
+# Step 2: Install Chocolatey (Package Manager for Windows)
+Set-ExecutionPolicy RemoteSigned -Force
+iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
-2.	Install Chocolatey (Package Manager for Windows)
+# Step 3: Setting up KnowledgeIra-Labs directory
+$directoryPath = "C:\KnowledgeIra-Labs"
+if (Test-Path $directoryPath -PathType Container) {
+    Remove-Item -Path $directoryPath -Recurse -Force
+}
+New-Item -Path $directoryPath -ItemType Directory
+cd $directoryPath
 
-Run the following command to install Chocolatey:
+# Step 4: Install VirtualBox
+choco install virtualbox -y
 
+# Step 5: Install Vagrant
+choco install vagrant -y
 
-3.	Setting up KnowledgeIra-Labs directory
+# Step 6: Create Vagrantfile
+$vagrantConfig = @"
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.network "private_network", type: "dhcp"
+end
+"@
+$vagrantConfig | Out-File -FilePath "Vagrantfile" -Encoding utf8
 
-If there's an existing	directory, remove it:
+# Step 7: Start Vagrant Box
+vagrant up
+# Disable the Windows firewall temporarily
+netsh advfirewall set allprofiles state off
 
+# Step 8: Display Vagrant Box Status
+vagrant status
+# Enable the Windows firewall again
+netsh advfirewall set allprofiles state on
 
-Create a new	directory and navigate into it:
-
-
-4.	Install VirtualBox
-
-Run the following command to install VirtualBox using Chocolatey:
-
- 
-
-5.	Install Vagrant
-
-Run the following command to install Vagrant using Chocolatey:
-
-
-6.	Create Vagrantfile
-
-Create a	with the specified configuration for the Ubuntu VM:
-
-
-7.	Start Vagrant Box
-
-Use the following command to start the Vagrant box: Disable the windows firewall before making it up and later once you are able then on it again.
-
-
- 
-8.	Display Vagrant Box Status
-
-Run the following command to display the status of the Vagrant box:
-
-
-Make sure to enable firewall again. Remember there can be many issues if your vagrant machines doesnot comeup, search google for them.
-9.	SSH into the Vagrant Box
-
-a.	Use the following command to establish an SSH connection to the Vagrant box:
-
-
-After following these steps, you should have a running Ubuntu VM on your Windows system, and you can access it using SSH through Vagrant
+# Step 9: SSH into the Vagrant Box
+vagrant ssh
