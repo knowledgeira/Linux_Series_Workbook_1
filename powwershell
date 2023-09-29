@@ -1,0 +1,54 @@
+MANUAL INSTALLATION STEPS FOR SETTING UP GUEST UBUNTU VM USING VAGRANT AND VIRTUALBOX ON HOST WINDOWS 11
+1.	Open PowerShell as Administrator
+
+a.	Press Windows + S to open the search bar.
+b.	Type in PowerShell .
+c.	Right-click on Windows PowerShell from the search results and select Run as administrator .
+
+2.	Install Chocolatey (Package Manager for Windows)
+
+Run the following command to install Chocolatey:
+
+
+3.	Setting up KnowledgeIra-Labs directory
+
+If there's an existing	directory, remove it:
+
+
+Create a new	directory and navigate into it:
+
+
+4.	Install VirtualBox
+
+Run the following command to install VirtualBox using Chocolatey:
+
+ 
+
+5.	Install Vagrant
+
+Run the following command to install Vagrant using Chocolatey:
+
+
+6.	Create Vagrantfile
+
+Create a	with the specified configuration for the Ubuntu VM:
+
+
+7.	Start Vagrant Box
+
+Use the following command to start the Vagrant box: Disable the windows firewall before making it up and later once you are able then on it again.
+
+
+ 
+8.	Display Vagrant Box Status
+
+Run the following command to display the status of the Vagrant box:
+
+
+Make sure to enable firewall again. Remember there can be many issues if your vagrant machines doesnot comeup, search google for them.
+9.	SSH into the Vagrant Box
+
+a.	Use the following command to establish an SSH connection to the Vagrant box:
+
+
+After following these steps, you should have a running Ubuntu VM on your Windows system, and you can access it using SSH through Vagrant
