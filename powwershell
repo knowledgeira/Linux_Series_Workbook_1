@@ -1,6 +1,3 @@
-# Step 1: Open PowerShell as Administrator
-Start-Process powershell -ArgumentList 'Start-Process powershell -Verb runAs'
-
 # Step 2: Install Chocolatey (Package Manager for Windows)
 Set-ExecutionPolicy RemoteSigned -Force
 iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
@@ -20,21 +17,25 @@ choco install virtualbox -y
 choco install vagrant -y
 
 # Step 6: Create Vagrantfile
-$vagrantConfig = @"
+@"
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/bionic64"
-  config.vm.network "private_network", type: "dhcp"
+ config.ssh.insert_key = false
+ config.vm.define "knowledgeira" do |node|
+ node.vm.box = "generic/ubuntu2204"
+ node.vm.hostname = "knowledgeira"
+ node.vm.network "private_network", ip: "192.168.57.100"
+ end
 end
-"@
-$vagrantConfig | Out-File -FilePath "Vagrantfile" -Encoding utf8
+"@ | Out-File -Encoding ascii Vagrantfile
 
 # Step 7: Start Vagrant Box
-vagrant up
 # Disable the Windows firewall temporarily
 netsh advfirewall set allprofiles state off
+vagrant up
 
 # Step 8: Display Vagrant Box Status
 vagrant status
+
 # Enable the Windows firewall again
 netsh advfirewall set allprofiles state on
 
