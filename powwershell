@@ -40,4 +40,6 @@ vagrant status
 netsh advfirewall set allprofiles state on
 
 # Step 9: SSH into the Vagrant Box
-vagrant ssh
+# Provide an on-screen message
+Write-Host "You can now SSH into the Vagrant box 'knowledgeira' using the following command:"
+Write-Host "vagrant ssh knowledgeira"
