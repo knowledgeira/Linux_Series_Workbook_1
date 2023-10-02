@@ -1,0 +1,292 @@
+Task 11: Setting Up a Vagrant Environment
+
+Objective: Set up a Vagrant environment using a predefined Vagrantfile. This will allow you to practice and hone your SSH skills in a controlled environment.
+
+Setup of Our VMs:
+•	Our Setup:
+o	JumpHost-Controller: 
+o	TargetHost1: This can be considered a client or a target machine that you want to access or manage using SSH.
+o	TargetHost2: Another target machine, but with a different operating system to demonstrate cross-OS SSH functionality.
+•	For our hands-on scenario, we'll use Vagrant to set up three VMs:
+•	JumpHost-Controller: Acts as the mgmt. Node from where your production server are reachable, possibly where you'd be SSHing from. IP: 192.168.57.100
+
+•	TargetHost1: A target Production  machine for our operations. IP: 192.168.57.101
+•	TargetHost2: Another target Production, running Fedora. IP: 192.168.57.102
+
+
+Lab pre-requisites:
+
+1. Create a new directory in Host Windows/Ubuntu.Mac OS for this Lab session and navigate to it:
+       mkdir Lab11 
+       cd Lab11
+2.Download the Vagrantfile in this directory by running  following complete command:
+For Linux
+	  curl -s https://raw.githubusercontent.com/knowledgeira/Linux_Basics_Workbook/mj/Lab11/ssh_vagrantfile -o Vagrantfile
+0
+•	The -o Vagrantfile option tells curl to output the downloaded file to a file named Vagrantfile in the current directory.
+•	The URL at the end is the file you want to download.
+If you getting Invoke-webrequesterror in windows 11 use :
+Remove-item alias:curl  
+Run again our original curl command
+
+3..  Start and provision the virtual machines defined in the Vagrantfile:
+	vagrant up
+
+4. Once the provisioning is complete, you can check the status of your Vagrant machines using:
+
+	vagrant status
+
+5. last but not Least vagrant ssh into Jumphost-Controller/It’s Server from which you will access your production Vm’s.
+
+Now, your environment is set up, and you can begin with the SSH tasks!
+
+Task 0 : Check the SSH server and client are installed on respective machines
+Task 1: Check if the SSH server is installed on each VM:
+1.	SSH into each VM: (Open 3 terminals for 3 Vm’s.)
+o	For JumpHost-Controller:
+  
+•	vagrant ssh JumpHost-Controller
+•	Repeat for TargetHost1 and TargetHost2.
+Once inside the VM, check for the OpenSSH server:
+
+dpkg -l | grep openssh-server    # For Ubuntu
+rpm -q openssh-server            # For CentOS/Red Hat
+ If the OpenSSH server is not installed (i.e., nothing is returned from the above command), you can install it:
+
+3.	sudo apt-get install openssh-server    # For Ubuntu
+4.	sudo yum install openssh-server        # For CentOS/Red Hat
+
+Task 2: Ensure the SSH server is running:
+1.	While still inside the VM, check the status of the SSH server:
+
+sudo systemctl status sshd
+If it's not running, start the SSH server and also enable it :
+2.	sudo systemctl start sshd
+3.	sudo systemctl enable sshd
+
+Task 3: Verify the SSH client on the host machine:
+1.	If you are on an Ubuntu host:
+Check if the OpenSSH client is installed:
+
+    dpkg -l | grep openssh-client
+If not installed:
+sudo apt-get install openssh-client
+
+1.	If you are on a Windows host:
+o	Windows has a built-in SSH client in newer versions. You can verify its existence by trying to run ssh in Command Prompt or PowerShell.
+o	If you're using a tool like PuTTY, ensure you have the latest version installed.
+Task 4: Test SSH connectivity:
+1.	From your host machine, attempt to SSH into Jumphost and try to ssh into other 2 production server.
+
+1.	ssh vagrant@192.168.57.101    
+
+
+Task 1: Create a User on Remote Server
+•	 On both Production_Server1 and Production_Server2, create a user named ansible.
+•	Solution:
+•	sudo adduser ansible
+•	Explanation: Demonstrates basic user management in Linux.
+
+Task 2: SSH to a Remote Server
+•	 From localsshMachine, SSH into Production_Server1 using the user vagrant.
+
+•	Solution:
+
+•	ssh vagrant@192.168.57.101
+•	Explanation: Introduces the basic SSH command.
+
+Task 3: Running Command over SSH
+•	 From localsshMachine, SSH into Production_Server2 and get the disk usage without logging into the machine.
+•	Solution:
+
+•	ssh vagrant@192.168.57.102 "df -h"
+•	Explanation: Demonstrates remote command execution with SSH.
+
+Task 4: Passwordless SSH
+•	 Set up passwordless SSH from localsshMachine to both production servers.
+•	Solution:
+•	Generate an SSH keypair on localsshMachine: ssh-keygen.
+•	Copy the public key to both servers: ssh-copy-id vagrant@192.168.57.101 and ssh-copy-id vagrant@192.168.57.102.
+•	Explanation: Covers the convenience and security of passwordless SSH.
+
+Task 5: SSH Config File
+•	 Create an SSH config file on localsshMachine to simplify SSH commands.
+•	Solution: Create a ~/.ssh/config file with:
+•	Host prod1
+  HostName 192.168.57.101
+  User vagrant
+
+Host prod2
+  HostName 192.168.57.102
+  User vagrant
+Use SSH by simply typing ssh prod1.
+•	Explanation: Demonstrates efficiency with SSH config files.
+
+Task 6: Disabling Host Key Checking
+•	 SSH into Production_Server1 without the SSH host key check.
+•	Solution:
+
+•	ssh -o StrictHostKeyChecking=no vagrant@192.168.57.101
+•	Explanation: Covers the risks and convenience of skipping host key verification.
+
+Task 7: Use SSH Agent Forwarding
+•	 Use ssh-agent on localsshMachine to forward authentication requests.
+•	Solution:
+
+•	eval $(ssh-agent -s)
+ssh-add
+ssh -A vagrant@192.168.57.101
+•	Explanation: Introduces the concept of SSH agent forwarding for easier remote management.
+
+Task 8: SFTP File Transfer
+•	 Use SFTP to transfer a file from localsshMachine to Production_Server2.
+•	Solution:
+
+•	sftp vagrant@192.168.57.102
+put /path/to/local/file /remote/path/
+•	Explanation: Demonstrates secure file transfer using SSH.
+
+Task 9: SSH Tunneling
+•	 Set up an SSH tunnel from localsshMachine to Production_Server1.
+•	Solution:
+
+•	ssh -L 8080:localhost:80 vagrant@192.168.57.101
+•	Explanation: Introduces port forwarding with SSH for secure connections.
+
+Task 10: X11 Forwarding with SSH
+•	 Install a graphical application on Production_Server1 (e.g., xeyes) and use X11 forwarding to display it on localsshMachine.
+•	Solution:
+
+•	ssh -X vagrant@192.168.57.101
+xeyes
+•	Explanation: Demonstrates how to use SSH for GUI applications remotely.
+
+Task 11: Customize SSH Banner
+•	 Set a custom SSH login banner for Production_Server2.
+•	Solution: Modify /etc/ssh/sshd_config to set the Banner directive to a custom file. Restart SSH.
+•	Explanation: Showcases SSH customization for user notifications.
+
+Task 12: Limiting User Access via SSH
+•	 Only allow the ansible user SSH access on Production_Server1.
+•	Solution: Modify /etc/ssh/sshd_config to include AllowUsers ansible and restart SSH.
+•	Explanation: Highlights user access controls in SSH.
+
+Task 13: Key-based Authentication Only
+•	 On Production_Server2, disable password authentication for SSH.
+•	Solution: Modify /etc/ssh/sshd_config to set PasswordAuthentication no and restart SSH.
+•	Explanation: Showcases a common security measure for SSH servers.
+
+Task 14: Rate Limiting SSH Connections
+•	 Set up rate-limiting for SSH on Production_Server1.
+•	Solution: Use iptables or ufw to limit incoming SSH connections.
+•	Explanation: Demonstrates SSH protection against brute-force attacks.
+
+Task 15: Using mosh
+•	 Install and use mosh to connect from localsshMachine to Production_Server1.
+•	Solution: Install mosh on both machines, and use mosh vagrant@192.168.57.101.
+•	Explanation: Introduces mosh, a resilient mobile shell alternative to SSH.
+
+Task 16: Remote Script Execution
+•	 Execute a local script remotely on Production_Server2.
+•	Solution:
+
+•	ssh vagrant@192.168.57.102 'bash -s' < /path/to/local/script.sh
+•	Explanation: Demonstrates advanced remote command execution.
+
+Task 17: SSH Escape Sequences
+•	 While SSH-ed into Production_Server1, use escape sequences to check network connectivity without logging out.
+•	Solution: Press ~ followed by C, then use -O check to check the connection.
+•	Explanation: Showcases SSH's built-in escape sequences for control.
+
+Task 18: SSH with Different Port
+•	 Change the SSH port on Production_Server2 to 2222 and connect from localsshMachine.
+•	Solution:
+•	Modify /etc/ssh/sshd_config on Production_Server2 to set Port 2222 and restart SSH.
+•	Connect using: ssh -p 2222 vagrant@192.168.57.102.
+•	Explanation: Shows SSH flexibility with custom ports.
+
+Task 19: Restrict SSH Commands
+•	 Set up Production_Server1 to only allow the df command via SSH for the ansible user.
+•	Solution: Use the command directive in the ~ansible/.ssh/authorized_keys file.
+•	Explanation: Demonstrates SSH command restrictions for security.
+
+Task 20: SCP for File Transfer
+•	 Transfer a directory from localsshMachine to Production_Server2 using SCP.
+•	Solution:
+
+•	scp -r /path/to/local/directory vagrant@192.168.57.102:/remote/path/
+•	Explanation: Introduces the SCP command for secure copying.
+
+[The list can be continued in a similar structured format for the remaining 10 labs, covering advanced SSH topics.]
+Note: These tasks assume the students have root privileges or sudo rights on the VMs, and that they are aware of basic Linux operations and navigation. Adjustments can be made based on the students' knowledge level.
+
+Task 21: SSH Chroot Jail
+•	 Restrict the ansible user on Production_Server1 to a chroot jail.
+•	Solution:
+•	Create a directory: sudo mkdir /home/chrootjail
+•	Modify /etc/ssh/sshd_config to add:
+•	Match User ansible
+ChrootDirectory /home/chrootjail
+•	Restart SSH.
+•	Explanation: Demonstrates how to limit a user's environment using chroot, increasing security.
+
+Task 22: SSHFS: Mount Remote Directory
+•	 Use SSHFS to mount a directory from Production_Server2 to localsshMachine.
+•	Solution:
+
+•	sudo apt-get install sshfs
+mkdir ~/remote-dir
+sshfs vagrant@192.168.57.102:/path/on/server ~/remote-dir
+•	Explanation: Introduces SSHFS for remote file system access via SSH.
+
+Task 23: Key-based Authentication with Passphrase
+•	 Set up key-based authentication with a passphrase for the ansible user.
+•	Solution:
+
+•	ssh-keygen -f ansible_key
+When prompted, set a passphrase.
+•	Explanation: Enhances security by using a passphrase for SSH keys.
+
+Task 24: Revoking SSH Keys
+•	 Revoke an SSH key for the ansible user on Production_Server1.
+•	Solution: Remove the corresponding public key line from ~ansible/.ssh/authorized_keys.
+•	Explanation: Demonstrates the revocation of SSH key access.
+
+Task 25: SSH Multiplexing
+•	 Set up SSH multiplexing for faster subsequent connections to Production_Server2.
+•	Solution: Add these lines to ~/.ssh/config:
+javascript
+•	Host prod2
+    ControlPath ~/.ssh/cm_socket/%r@%h:%p
+    ControlMaster auto
+    ControlPersist 10m
+•	Explanation: Introduces SSH multiplexing for enhanced speed.
+
+Task 26: SSH ProxyJump
+•	 Connect to Production_Server2 from localsshMachine using Production_Server1 as a jump host.
+•	Solution:
+
+•	ssh -J vagrant@192.168.57.101 vagrant@192.168.57.102
+•	Explanation: Demonstrates how to use an intermediary server for SSH.
+
+Task 27: SSH Certificate-based Authentication
+•	 Implement SSH certificate-based authentication for Production_Server1.
+•	Solution: Use ssh-keygen to create a CA, sign user keys, and then specify the CA in sshd_config.
+•	Explanation: Shows an advanced method of authentication using SSH certificates.
+
+Task 28: Setting SSH Idle Timeout
+•	 Set an idle timeout of 5 minutes on Production_Server2.
+•	Solution: Add ClientAliveInterval 300 and ClientAliveCountMax 0 to /etc/ssh/sshd_config and restart SSH.
+•	Explanation: Demonstrates how to disconnect inactive SSH sessions.
+
+Task 29: Advanced: SSH Port Knocking
+•	 Implement port knocking on Production_Server1 for SSH.
+•	Solution: Use iptables to configure port sequences, then knock from client side before connecting.
+•	Explanation: Introduces the concept of port knocking as an additional SSH security layer.
+
+Task 30: Advanced: Two-Factor Authentication for SSH
+•	 Set up Two-Factor Authentication (2FA) for SSH on Production_Server2.
+•	Solution: Use tools like google-authenticator and PAM configurations to achieve 2FA.
+•	Explanation: Demonstrates how to increase SSH security using 2FA
+
+
